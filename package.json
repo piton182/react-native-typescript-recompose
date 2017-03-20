@@ -1,22 +1,51 @@
 {
-	"name": "Todo",
-	"version": "0.0.1",
-	"private": true,
-	"scripts": {
-		"start:ios": "react-native run-ios",
-		"test": "jest"
-	},
-	"dependencies": {
-		"react": "15.4.2",
-		"react-native": "0.42.3"
-	},
-	"devDependencies": {
-		"babel-jest": "19.0.0",
-		"babel-preset-react-native": "1.9.1",
-		"jest": "19.0.2",
-		"react-test-renderer": "15.4.2"
-	},
-	"jest": {
-		"preset": "react-native"
-	}
+  "name": "Todo",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "test": "jest --coverage",
+    "tsc": "tsc",
+    "clean": "rimraf artifacts",
+    "build": "npm run clean && npm run tsc --",
+    "lint": "tslint src/**/*.ts",
+    "watch": "npm run build -- -w",
+    "start:ios": "npm run build && concurrently -r 'npm run watch' 'react-native run-ios'",
+    "start:android": "npm run build && concurrently -r 'npm run watch' 'react-native run-android'"
+  },
+  "dependencies": {
+    "@types/recompose": "^0.20.4",
+    "babel-preset-es2015": "^6.24.0",
+    "most": "^1.2.2",
+    "react": "~15.4.1",
+    "react-native": "0.42.0",
+    "recompose": "^0.22.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^18.1.1",
+    "@types/react": "^15.0.14",
+    "@types/react-native": "^0.37.13",
+    "babel-jest": "19.0.0",
+    "babel-preset-react-native": "1.9.1",
+    "concurrently": "^3.4.0",
+    "jest": "19.0.2",
+    "react-test-renderer": "~15.4.1",
+    "rimraf": "^2.6.1",
+    "tslint": "^4.5.1",
+    "typescript": "^2.2.1"
+  },
+  "jest": {
+    "preset": "react-native",
+    "testRegex": "artifacts/.+\\.(test|spec).js$",
+    "coverageDirectory": "coverage",
+    "coverageReporters": [
+      "text-summary",
+      "html"
+    ],
+    "collectCoverageFrom": [
+      "artifacts/**/*.js",
+      "!artifacts/**/*.spec.js",
+      "!artifacts/**/*.index.js"
+    ]
+  }
 }
