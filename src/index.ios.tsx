@@ -1,48 +1,32 @@
-import { AppRegistry, StyleSheet, Text, View } from 'react-native'
+import { AppRegistry, ListView, Text, View } from 'react-native'
 
 import React from 'react'
 
 import { setObservableConfig, mapPropsStream } from 'recompose'
-import { just, from } from 'most'
-import { async, Subject } from 'most-subject'
+import { periodic, from } from 'most'
+// import { async, Subject } from 'most-subject'
+import * as R from 'ramda'
 
 setObservableConfig({
   fromESObservable: from as any
 })
 
-export interface Props { }
-export interface State { }
+const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
 
-const styles: any = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF'
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5
-  }
-})
+const data$ = from([
+  'John', 'Joel', 'James', 'Jimmy', 'Jackson', 'Jillian', 'Julie', 'Devin'
+])
+.zip(R.identity, periodic(500))
+.scan((acc, x) => R.concat(R.of(x), acc), [])
 
-const $click$: Subject<any> = async<any>()
-const handleClick = () => { $click$.next('click') }
-const name$ = just(1).concat($click$).scan((acc, _) => ++acc, 0)
-
-const MyTodo = name =>
-  <View style={styles.container}>
-    <Text style={styles.welcome} onPress={handleClick}>
-      Hello {name}
-    </Text>
+const MyListViewBasics = dataBlob =>
+  <View style={{flex: 1, paddingTop: 22}}>
+    <ListView
+      dataSource={ds.cloneWithRows(dataBlob)}
+      renderRow={(rowData) => <Text>{rowData}</Text>}
+    />
   </View>
 
-const Todo = mapPropsStream(() => name$)(MyTodo)
+const ListViewBasics = mapPropsStream(() => data$)(MyListViewBasics)
 
-AppRegistry.registerComponent('Todo', () => Todo)
+AppRegistry.registerComponent('ListViewBasics', () => ListViewBasics)
