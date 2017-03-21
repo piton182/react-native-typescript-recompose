@@ -2,11 +2,12 @@ import { AppRegistry, StyleSheet, Text, View } from 'react-native'
 
 import React from 'react'
 
-import mostConfig from 'recompose/mostObservableConfig'
-import { setObservableConfig, mapPropsStream } from 'recompose'
-setObservableConfig(mostConfig)
+import { setObservableConfig, mapPropsStream, createEventHandler } from 'recompose'
+import { just, never, from, Stream } from 'most'
 
-import { just } from 'most';
+setObservableConfig({
+  fromESObservable: from as any
+})
 
 export interface Props { }
 export interface State { }
@@ -30,14 +31,17 @@ const styles: any = StyleSheet.create({
   }
 })
 
+// TODO: use most's Subject instead
+const { handler: handleClick, stream: click$ } = createEventHandler()
+// const name$ = just('A').concat(just('B').delay(500))
+const name$ = just('A').concat((click$ as Stream<any>).map(() => 'B'))
+
 const MyTodo = name =>
   <View style={styles.container}>
-    <Text style={styles.welcome}>
+    <Text style={styles.welcome} onPress={() => handleClick('click')}>
       Hello {name}
     </Text>
   </View>
-
-const name$ = just('A').concat(just('B').delay(500));
 
 const Todo = mapPropsStream(() => name$)(MyTodo)
 
