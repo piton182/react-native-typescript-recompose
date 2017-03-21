@@ -1,4 +1,14 @@
-import { AppRegistry, ListView, Text, View, AsyncStorage } from 'react-native'
+import {
+  AppRegistry,
+  ListView,
+  Text,
+  View,
+  AsyncStorage,
+  NavigatorIOS,
+  TouchableHighlight,
+  Button
+} from 'react-native'
+import { StackNavigator } from 'react-navigation'
 
 import React from 'react'
 
@@ -47,4 +57,38 @@ const MyListViewBasics = dataBlob =>
 
 const ListViewBasics = mapPropsStream(() => data$)(MyListViewBasics)
 
-AppRegistry.registerComponent('ListViewBasics', () => ListViewBasics)
+class HomeScreen extends React.Component<any, any> {
+  static navigationOptions = {
+    title: 'Welcome'
+  }
+  render() {
+    const { navigate } = this.props.navigation
+    return (
+      <View>
+        <Text>Hello World!</Text>
+        <Button
+          onPress={() => navigate('Chat')}
+          title='Chat with Lucy'
+        />
+      </View>
+    )
+  }
+}
+
+class ChatScreen extends React.Component<any, any> {
+  static navigationOptions = {
+    title: 'Chat with Lucy'
+  }
+  render() {
+    return (
+      <ListViewBasics/>
+    )
+  }
+}
+
+const App = StackNavigator({
+  Home: { screen: HomeScreen },
+  Chat: { screen: ChatScreen },
+})
+
+AppRegistry.registerComponent('App', () => App)
