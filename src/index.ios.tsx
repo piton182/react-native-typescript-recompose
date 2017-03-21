@@ -2,8 +2,9 @@ import { AppRegistry, StyleSheet, Text, View } from 'react-native'
 
 import React from 'react'
 
-import { setObservableConfig, mapPropsStream, createEventHandler } from 'recompose'
-import { just, never, from, Stream } from 'most'
+import { setObservableConfig, mapPropsStream } from 'recompose'
+import { just, from } from 'most'
+import { async, Subject } from 'most-subject'
 
 setObservableConfig({
   fromESObservable: from as any
@@ -31,14 +32,13 @@ const styles: any = StyleSheet.create({
   }
 })
 
-// TODO: use most's Subject instead
-const { handler: handleClick, stream: click$ } = createEventHandler()
-// const name$ = just('A').concat(just('B').delay(500))
-const name$ = just('A').concat((click$ as Stream<any>).map(() => 'B'))
+const $click$: Subject<any> = async<any>()
+const handleClick = () => { $click$.next('click') }
+const name$ = just(1).concat($click$).scan((acc, _) => ++acc, 0)
 
 const MyTodo = name =>
   <View style={styles.container}>
-    <Text style={styles.welcome} onPress={() => handleClick('click')}>
+    <Text style={styles.welcome} onPress={handleClick}>
       Hello {name}
     </Text>
   </View>
