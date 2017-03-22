@@ -57,3 +57,4 @@ fastlane/screenshots
 
 
 artifacts
+.auth0-credentials*
