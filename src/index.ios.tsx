@@ -18,6 +18,8 @@ import ProfileView from './profile'
 import mostConfig from 'recompose/mostObservableConfig'
 setObservableConfig(mostConfig)
 
+// === Effects
+
 const LOCK_DELAY = 500
 const lockAuth$: Stream<any> =
   just('x').delay(LOCK_DELAY)
@@ -61,6 +63,7 @@ const navStyles = StyleSheet.create({
   navButtonText: {
     fontSize: 16,
     marginRight: 13,
+    marginLeft: 13,
     marginTop: 10,
     color: 'blue',
   },
@@ -70,30 +73,30 @@ const navStyles = StyleSheet.create({
   } 
 })
 
+const Screen1 = () =>
+  <Text>Screen1</Text>
+
 const renderScene = (route, navigator) =>
   (route.name === 'Profile')
     ? <ProfileView {...route.passProps} />
-    : null
+    : (route.name === 'Screen1')
+        ? <Screen1/>
+        : null
 
 const NavigationBarRouteMapper = {
   LeftButton: (route, navigator, index, navState) =>
-    null
-    /*(route.name === 'Logo')
-      ? null 
-      : (route.name === 'Profile')
-        ? (<TouchableHighlight underlayColor="transparent" onPress={() => { if (index > 0) { navigator.push({ name: 'Logo' }) }}}>
-            <Text style={navStyles.navButtonText}>Back</Text>
-          </TouchableHighlight>)
-        : null*/
+    (route.name === 'Screen1')
+      ? <TouchableHighlight underlayColor='transparent' onPress={() => navigator.pop()}>
+          <Text style={navStyles.navButtonText}>Back</Text>
+        </TouchableHighlight>
+      : null
   ,
   RightButton: (route, navigator, index, navState) =>
-    null
-    // <LogoutButton style={navStyles.navButtonText}/>
-    /*(route.name === 'Logo')
-      ? (<TouchableHighlight underlayColor="transparent">
-          <Text style={navStyles.navButtonText}>Login</Text>
-        </TouchableHighlight>)
-      : null*/
+    (route.name === 'Profile')
+      ? <TouchableHighlight underlayColor='transparent' onPress={() => navigator.push({ name: 'Screen1' })}>
+          <Text style={navStyles.navButtonText}>To Screen1</Text>
+        </TouchableHighlight>
+      : null
   ,
   Title: (route, navigator, index, navState) =>
     (route.name === 'Profile')
