@@ -22,9 +22,18 @@ setObservableConfig(mostConfig)
 
 const LOCK_DELAY = 1000
 const lockAuth$: Stream<any> =
-  just('x').delay(LOCK_DELAY)
-  .concat(loginEventHandler.stream as any)
-  .map(() =>
+  just('normal').delay(LOCK_DELAY).merge(loginEventHandler.stream as any)
+  .map(type =>
+    R.merge({ closable: true })(
+      (type === 'touchid')
+        ? { connections: ['touchid'] }
+        : (type === 'sms')
+            ? { connections: ['sms'] }
+            : (type === 'email')
+                ? { connections: ['email'] }
+                : {}
+    )
+  ).map(options =>
     fromPromise(AsyncStorage.getItem('@MySuperStorage:auth'))
     .flatMap(auth =>
       (auth !== null)
@@ -35,6 +44,7 @@ const lockAuth$: Stream<any> =
       JSON.parse
     ).recoverWith(() =>
       showLock(
+        options
       ).tap(auth =>
         AsyncStorage.setItem('@MySuperStorage:auth', JSON.stringify(auth))
       )

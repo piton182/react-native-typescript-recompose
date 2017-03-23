@@ -17,21 +17,22 @@ const logoStyles = StyleSheet.create({
     alignSelf: 'stretch',
     backgroundColor: '#D9DADF',
     margin: 10,
-    marginTop: 100,
+    // marginTop: 100,
     borderRadius: 5,
     justifyContent: 'center',
     alignItems: 'center',
   },
   logo: {
     fontSize: 30,
-    color: 'white'
+    color: 'white',
+    margin: 50,
   }
 })
 
 const $login$ = async()
 
 export const eventHandler = {
-  handler: () => $login$.next('x'),
+  handler: type => $login$.next(type),
   stream: $login$.multicast()
 }
 
@@ -39,12 +40,32 @@ export default props =>
   <View style={logoStyles.container as any}>
     <Text style={logoStyles.logo}>Logo</Text>
     {(props.showLoginButton)
-      ? <TouchableHighlight
-          style={logoStyles.signInButton as any}
-          underlayColor='#949494'
-          onPress={eventHandler.handler}>
-          <Text>Log In</Text>
-        </TouchableHighlight>
+      ? <View style={{alignSelf: 'stretch'}}>
+          <TouchableHighlight
+            style={logoStyles.signInButton as any}
+            underlayColor='#949494'
+            onPress={() => eventHandler.handler('normal')}>
+            <Text>Log In</Text>
+          </TouchableHighlight>
+          <TouchableHighlight
+            style={logoStyles.signInButton as any}
+            underlayColor='#949494'
+            onPress={() => eventHandler.handler('touchid')}>
+            <Text>via TouchID</Text>
+          </TouchableHighlight>
+          <TouchableHighlight
+            style={logoStyles.signInButton as any}
+            underlayColor='#949494'
+            onPress={() => eventHandler.handler('sms')}>
+            <Text>via SMS</Text>
+          </TouchableHighlight>
+          <TouchableHighlight
+            style={logoStyles.signInButton as any}
+            underlayColor='#949494'
+            onPress={() => eventHandler.handler('email')}>
+            <Text>via Email</Text>
+          </TouchableHighlight>
+        </View>
       : <ActivityIndicator size='large' style={{ marginTop: 30 }}/>
     }
   </View>
