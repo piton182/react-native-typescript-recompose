@@ -9,38 +9,11 @@ import { async, Subject } from 'most-subject'
 
 import showLock from './lock-service'
 import Logo, { eventHandler as loginEventHandler } from './logo'
+import { eventHandler as logoutEventHandler } from './logout'
+import ProfileView from './profile'
 
 import mostConfig from 'recompose/mostObservableConfig'
 setObservableConfig(mostConfig)
-
-const ProfileScreen = (props) =>
-  <View style={{
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
-  }}>
-    {/*<Text style={{fontSize: 30}}>Profile</Text>*/}
-  </View>
-
-// const renderScene = (route, navigator) =>
-//   (route.name === 'Logo')
-//     ? <LogoScreen navigator={navigator} {...route.passProps} />
-//     : <ProfileScreen />
-/*
-const App = auth =>
-  <Navigator
-    initialRoute={{name: 'Logo', passProps: {}}}
-    renderScene={renderScene}
-    navigationBar={
-      <Navigator.NavigationBar
-        style={{height: 60}}
-        routeMapper={NavigationBarRouteMapper} />
-    }
-  />*/
-
-const $restart$ = async()
-
-const logout = () => $restart$.next('x')
 
 const LOCK_DELAY = 500;
 const lockAuth$: Stream<any> =
@@ -56,29 +29,11 @@ const lockAuth$: Stream<any> =
   ).switchLatest()
 
 const auth$ = merge(
-  $restart$.startWith('x').map(() => ({ authToken: undefined })),
+  logoutEventHandler.stream
+    .startWith('x')
+    .map(() => ({ authToken: undefined })),
   lockAuth$
 )
-
-// ====== Profile View
-
-const ProfileViewStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-  }
-})
-
-const ProfileView = props =>
-  <View style={ProfileViewStyles.container as any}>
-    <Image style={{alignSelf: 'center', height: 60, width: 60, borderRadius: 30}}
-      source={{uri: props.profile.picture}}
-    />
-    <Text style={{fontSize: 17, textAlign: 'center', marginTop: 20}}>Welcome {props.profile.name}</Text>
-    <LogoutButton style={{ alignSelf: 'center', margin: 30, fontSize: 18, color: 'blue' }}/>
-  </View>
 
 // ==== Nav
 
@@ -103,13 +58,6 @@ const renderScene = (route, navigator) =>
   (route.name === 'Profile')
     ? <ProfileView {...route.passProps} />
     : null
-
-
-const LogoutButton = ({ style }) =>
-  <TouchableHighlight underlayColor='transparent' onPress={logout}>
-    <Text style={style}>Logout</Text>
-  </TouchableHighlight>
-
 
 const NavigationBarRouteMapper = {
   LeftButton: (route, navigator, index, navState) =>
