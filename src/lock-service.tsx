@@ -13,7 +13,7 @@ const showLock = () =>
       if (err) {
         error(new Error(err))
       } else {
-        add(token)
+        add({profile, token})
         end()
       }
     })
