@@ -9,6 +9,7 @@ const showLock = () =>
   create((add, end, error) => {
     lock.show({
       closable: true,
+      connections: ['touchid']
     }, (err, profile, token) => {
       if (err) {
         error(new Error(err))
