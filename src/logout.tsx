@@ -1,4 +1,4 @@
-import { Text, TouchableHighlight } from 'react-native'
+import { Text, TouchableHighlight, AsyncStorage } from 'react-native'
 
 import React from 'react'
 
@@ -7,7 +7,10 @@ import { async, Subject } from 'most-subject'
 const $restart$ = async()
 
 export const eventHandler = {
-  handler: () => $restart$.next('x'),
+  handler: () => {
+    AsyncStorage.removeItem('@MySuperStorage:auth')
+    $restart$.next('x')
+  },
   stream: $restart$.multicast()
 }
 

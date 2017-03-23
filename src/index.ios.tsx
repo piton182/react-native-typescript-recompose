@@ -1,10 +1,10 @@
-import { AppRegistry, Text, View, Navigator, TouchableHighlight, StyleSheet, Image } from 'react-native'
+import { AppRegistry, Text, View, Navigator, TouchableHighlight, StyleSheet, Image, AsyncStorage } from 'react-native'
 
 import React from 'react'
 
 import { componentFromStream, mapPropsStream, lifecycle, setObservableConfig, compose } from 'recompose'
 import * as R from 'ramda'
-import { just, merge, Stream } from 'most'
+import { just, throwError, merge, fromPromise, Stream } from 'most'
 import { async, Subject } from 'most-subject'
 
 import showLock from './lock-service'
@@ -20,20 +20,34 @@ const lockAuth$: Stream<any> =
   just('x').delay(LOCK_DELAY)
   .concat(loginEventHandler.stream as any)
   .map(() =>
-    showLock(
-    ).map(({ profile, token }) => (
-      { authToken: token, profile }
-    )).recoverWith(() => just(
-      { authToken: undefined, profile: undefined }
-    )).map(R.merge({ showLoginButton: true }))
+    fromPromise(AsyncStorage.getItem('@MySuperStorage:auth'))
+    .tap(console.log)
+    .flatMap(auth =>
+      (auth !== null)
+        ? just(auth)
+        : throwError(new Error('no auth in storage'))
+    )
+    .map(
+      JSON.parse
+    ).recoverWith(() =>
+      showLock(
+      ).tap(auth =>
+        AsyncStorage.setItem('@MySuperStorage:auth', JSON.stringify(auth))
+      )
+    ).recoverWith(() => just(
+      { token: undefined, profile: undefined }
+    )).map(R.merge(
+      { showLoginButton: true }
+    ))
   ).switchLatest()
 
-const auth$ = merge(
-  logoutEventHandler.stream
-    .map(() => ({ authToken: undefined, showLoginButton: true }))
-    .startWith({ authToken: undefined, showLoginButton: false }),
-  lockAuth$
-)
+const auth$ =
+  merge(
+    logoutEventHandler.stream
+      .map(() => ({ token: undefined, showLoginButton: true }))
+      .startWith({ token: undefined, showLoginButton: false }),
+    lockAuth$
+  )
 
 // ==== Nav
 
@@ -79,7 +93,7 @@ const NavigationBarRouteMapper = {
         </TouchableHighlight>)
       : null*/
   ,
-  Title: (route, navigator, index, navState) => console.log('*************') ||
+  Title: (route, navigator, index, navState) =>
     (route.name === 'Profile')
       ? <Text style={navStyles.navTitleText}>Profile</Text>
       : null
@@ -108,7 +122,7 @@ const App = props =>
 
 const enhance = mapPropsStream(() => auth$)
 const AppWrapper = enhance((props: any) =>
-  (props.authToken)
+  (props.token)
     ? <App {...props}/>
     : <Logo showLoginButton={props.showLoginButton} />
 )
