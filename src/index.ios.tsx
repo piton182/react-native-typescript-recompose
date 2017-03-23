@@ -20,7 +20,7 @@ setObservableConfig(mostConfig)
 
 // === Effects
 
-const LOCK_DELAY = 500
+const LOCK_DELAY = 1000
 const lockAuth$: Stream<any> =
   just('x').delay(LOCK_DELAY)
   .concat(loginEventHandler.stream as any)

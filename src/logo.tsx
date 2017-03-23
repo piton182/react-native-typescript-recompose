@@ -1,4 +1,4 @@
-import { View, Text, TouchableHighlight, StyleSheet } from 'react-native'
+import { View, Text, TouchableHighlight, StyleSheet, ActivityIndicator } from 'react-native'
 
 import React from 'react'
 
@@ -45,6 +45,6 @@ export default props =>
           onPress={eventHandler.handler}>
           <Text>Log In</Text>
         </TouchableHighlight>
-      : null
+      : <ActivityIndicator size='large' style={{ marginTop: 30 }}/>
     }
   </View>
