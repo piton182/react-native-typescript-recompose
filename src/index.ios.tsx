@@ -1,3 +1,6 @@
+// TODO: this fixes a problem with fetch not working: <Error>: undefined is not an object (evaluating 'self.fetch')
+import 'react-native-browser-polyfill'
+
 import { AppRegistry, Text, View, Navigator, TouchableHighlight, StyleSheet, Image, AsyncStorage } from 'react-native'
 
 import React from 'react'
@@ -21,7 +24,6 @@ const lockAuth$: Stream<any> =
   .concat(loginEventHandler.stream as any)
   .map(() =>
     fromPromise(AsyncStorage.getItem('@MySuperStorage:auth'))
-    .tap(console.log)
     .flatMap(auth =>
       (auth !== null)
         ? just(auth)
