@@ -91,17 +91,44 @@ const auth$ = merge(
 )
 
 const Logo = () =>
-  <View>
-    <Text>Logo</Text>
-    <TouchableHighlight onPress={() => login()}>
-      <Text>Login</Text>
+  <View style={logoStyles.container as any}>
+    <Text style={logoStyles.logo}>Logo</Text>
+    <TouchableHighlight
+      style={logoStyles.signInButton as any}
+      underlayColor='#949494'
+      onPress={login}>
+      <Text>Log In</Text>
     </TouchableHighlight>
   </View>
+
+const logoStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#15204C',
+  },
+  signInButton: {
+    height: 50,
+    alignSelf: 'stretch',
+    backgroundColor: '#D9DADF',
+    margin: 10,
+    marginTop: 100,
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logo: {
+    fontSize: 30,
+    color: 'white'
+  }
+})
 
 const App = () =>
   <View>
     <Text>App</Text>
-    <TouchableHighlight onPress={() => logout()}>
+    <TouchableHighlight onPress={logout}>
       <Text>Logout</Text>
     </TouchableHighlight>
   </View>
