@@ -2,49 +2,17 @@ import { AppRegistry, Text, View, Navigator, TouchableHighlight, StyleSheet } fr
 
 import React from 'react'
 
-import { mapPropsStream } from 'recompose'
+import { componentFromStream, mapPropsStream, lifecycle, setObservableConfig, compose } from 'recompose'
 import * as R from 'ramda'
+import { just, merge, Stream } from 'most'
+import { async, Subject } from 'most-subject'
 
-import Auth0Lock from 'react-native-lock'
-import credentials from './.auth0-credentials'
-const lock = new Auth0Lock(credentials)
+import showLock from './lock-service'
 
-const showLock = (navigator, nextRoute) =>
-  lock.show({
-    closable: true,
-  }, (err, profile, token) => {
-    if (err) {
-      console.log(err)
-    } else {
-      console.log('Logged in!')
-      navigator.push(nextRoute)
-    }
-  })
+import mostConfig from 'recompose/mostObservableConfig'
+setObservableConfig(mostConfig)
 
-class LogoScreen extends React.Component<{navigator: Navigator}, any> {
-  componentDidMount() {
-    const loggedIn = false;
-    if (!loggedIn) {
-      setTimeout(
-        () => showLock(this.props.navigator, {name: 'Profile'})
-        , 1000
-      )
-    }
-  }
-  render() {
-    return (
-      <View style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
-        <Text style={{fontSize: 30}}>Logo</Text>
-      </View>
-    )
-  }
-}
-
-const ProfileScreen = () =>
+const ProfileScreen = (props) =>
   <View style={{
     flex: 1,
     justifyContent: 'center',
@@ -58,14 +26,14 @@ const NavigationBarRouteMapper = {
     (route.name === 'Logo')
       ? null 
       : (route.name === 'Profile')
-        ? (<TouchableHighlight underlayColor="transparent" onPress={() => { if (index > 0) { navigator.pop() } }}>
+        ? (<TouchableHighlight underlayColor="transparent" onPress={() => { if (index > 0) { navigator.push({ name: 'Logo' }) }}}>
             <Text style={styles.navButtonText}>Back</Text>
           </TouchableHighlight>)
         : null
   ,
   RightButton: (route, navigator, index, navState) =>
     (route.name === 'Logo')
-      ? (<TouchableHighlight underlayColor="transparent" onPress={() => showLock(navigator, {name: 'Profile'})}>
+      ? (<TouchableHighlight underlayColor="transparent">
           <Text style={styles.navButtonText}>Login</Text>
         </TouchableHighlight>)
       : null
@@ -83,22 +51,66 @@ const styles = StyleSheet.create({
   }
 })
 
-const renderScene = (route, navigator) =>
-  (route.name === 'Logo')
-    ? <LogoScreen navigator={navigator} {...route.passProps} />
-    : <ProfileScreen />
-
-const AppHOC = () =>
+// const renderScene = (route, navigator) =>
+//   (route.name === 'Logo')
+//     ? <LogoScreen navigator={navigator} {...route.passProps} />
+//     : <ProfileScreen />
+/*
+const App = auth =>
   <Navigator
-    initialRoute={{name: 'Logo'}}
+    initialRoute={{name: 'Logo', passProps: {}}}
     renderScene={renderScene}
     navigationBar={
       <Navigator.NavigationBar
         style={{height: 60}}
         routeMapper={NavigationBarRouteMapper} />
     }
-  />
+  />*/
 
-const App = mapPropsStream(R.identity)(AppHOC)
+const $restart$ = async()
+const $login$ = async()
 
-AppRegistry.registerComponent('App', () => App)
+const login = () => $login$.next('x')
+const logout = () => $restart$.next('x')
+
+const lockAuth$: Stream<any> =
+  just('x').delay(1000)
+  .concat($login$ as any)
+  .map(() =>
+    showLock(
+    ).map(token => (
+      { authToken: token }
+    )).recoverWith(() => just(
+      { authToken: undefined }
+    ))
+  ).switchLatest()
+
+const auth$ = merge(
+  $restart$.startWith('x').map(() => ({ authToken: undefined })),
+  lockAuth$
+)
+
+const Logo = () =>
+  <View>
+    <Text>Logo</Text>
+    <TouchableHighlight onPress={() => login()}>
+      <Text>Login</Text>
+    </TouchableHighlight>
+  </View>
+
+const App = () =>
+  <View>
+    <Text>App</Text>
+    <TouchableHighlight onPress={() => logout()}>
+      <Text>Logout</Text>
+    </TouchableHighlight>
+  </View>
+
+const enhance = mapPropsStream(() => auth$)
+const AppWrapper = enhance(({ authToken }: any) =>
+  authToken
+    ? <App/>
+    : <Logo/>
+)
+
+AppRegistry.registerComponent('App', () => AppWrapper as any)
