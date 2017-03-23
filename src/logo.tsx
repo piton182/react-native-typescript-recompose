@@ -35,13 +35,16 @@ export const eventHandler = {
   stream: $login$.multicast()
 }
 
-export default () =>
+export default props =>
   <View style={logoStyles.container as any}>
     <Text style={logoStyles.logo}>Logo</Text>
-    <TouchableHighlight
-      style={logoStyles.signInButton as any}
-      underlayColor='#949494'
-      onPress={eventHandler.handler}>
-      <Text>Log In</Text>
-    </TouchableHighlight>
+    {(props.showLoginButton)
+      ? <TouchableHighlight
+          style={logoStyles.signInButton as any}
+          underlayColor='#949494'
+          onPress={eventHandler.handler}>
+          <Text>Log In</Text>
+        </TouchableHighlight>
+      : null
+    }
   </View>

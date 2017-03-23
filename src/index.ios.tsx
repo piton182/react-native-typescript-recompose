@@ -15,7 +15,7 @@ import ProfileView from './profile'
 import mostConfig from 'recompose/mostObservableConfig'
 setObservableConfig(mostConfig)
 
-const LOCK_DELAY = 500;
+const LOCK_DELAY = 500
 const lockAuth$: Stream<any> =
   just('x').delay(LOCK_DELAY)
   .concat(loginEventHandler.stream as any)
@@ -25,13 +25,13 @@ const lockAuth$: Stream<any> =
       { authToken: token, profile }
     )).recoverWith(() => just(
       { authToken: undefined, profile: undefined }
-    ))
+    )).map(R.merge({ showLoginButton: true }))
   ).switchLatest()
 
 const auth$ = merge(
   logoutEventHandler.stream
-    .startWith('x')
-    .map(() => ({ authToken: undefined })),
+    .map(() => ({ authToken: undefined, showLoginButton: true }))
+    .startWith({ authToken: undefined, showLoginButton: false }),
   lockAuth$
 )
 
@@ -110,7 +110,7 @@ const enhance = mapPropsStream(() => auth$)
 const AppWrapper = enhance((props: any) =>
   (props.authToken)
     ? <App {...props}/>
-    : <Logo/>
+    : <Logo showLoginButton={props.showLoginButton} />
 )
 
 AppRegistry.registerComponent('App', () => AppWrapper as any)
