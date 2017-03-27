@@ -1,6 +1,3 @@
-// TODO: this fixes a problem with fetch not working: <Error>: undefined is not an object (evaluating 'self.fetch')
-import 'react-native-browser-polyfill'
-
 import { AppRegistry, Text, View, Navigator, TouchableHighlight, StyleSheet, Image, AsyncStorage } from 'react-native'
 
 import React from 'react'
@@ -14,6 +11,7 @@ import showLock from './lock-service'
 import Logo, { eventHandler as loginEventHandler } from './logo'
 import { eventHandler as logoutEventHandler } from './logout'
 import ProfileView from './profile'
+import Screen1 from './screen1'
 
 import mostConfig from 'recompose/mostObservableConfig'
 setObservableConfig(mostConfig)
@@ -82,9 +80,6 @@ const navStyles = StyleSheet.create({
     marginTop: 2,
   } 
 })
-
-const Screen1 = () =>
-  <Text>Screen1</Text>
 
 const renderScene = (route, navigator) =>
   (route.name === 'Profile')
